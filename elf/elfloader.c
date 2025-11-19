@@ -51,27 +51,22 @@ int main(int argc, char *argv[]) {
 		     MAP_ANONYMOUS | MAP_PRIVATE, 0, 0);
 
 
-  int offset;
+  int offset = 0;
   fread(codep,phd.p_memsz, 1, file);
-  if(head.e_entry == 0){
-    offset = 0;
-  } else if (head.e_entry != 0){
-    if(phd.p_vaddr > 0){
-      offset = phd.p_vaddr - head.e_entry;
-    } else {
-      offset = head.e_entry;
+  if (head.e_entry > 0) {
+    offset = head.e_entry;
+    if(phd.p_vaddr > 0) {
+      offset = head.e_entry - phd.p_vaddr;
     }
   }
 
   int result = 0;
   //fread(&codep, phd.p_memsz, 1, file); 
-  unsigned int (*mainfunc)(int, int) = codep;
+  unsigned int (*mainfunc)(int, int) = codep + offset;
   result = (*mainfunc)(a, b);
   
   printf("Answer: %d\n", result);
   munmap(codep, phd.p_memsz);
   fclose(file);
-
-  
   return 0;
 }
