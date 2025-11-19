@@ -18,6 +18,10 @@ int main(int argc, char *argv[]) {
 
   FILE *file;
   file = fopen(filename, "rb");
+  if(file == NULL){
+    fprintf(stderr, "Executable cannot be opened, or the Elf file is malformed\n");
+    return 2;
+  }
   Elf64_Ehdr head;
   fread(&head, sizeof(head), 1, file);
   // e_ident id = head.e_ident;
@@ -37,12 +41,14 @@ int main(int argc, char *argv[]) {
     //printf("type = LOAD\n");
   } else {
     fclose(file);
+    fprintf(stderr, "Header table was not PT_LOAD\n");
     return 3;
   }
   if(phd.p_flags & PF_X){  // Checks if the file is executable
     //printf("executable!\n");
   } else {
     fclose(file);
+    fprintf(stderr, "Header flags does nto have PF_X set\n");
     return 3;
   }
   //printf("phd.p_type == %u, phd.p_offset = %u, phd.p_vaddr = %u\n", phd.p_type,  phd.p_offset, phd.p_vaddr);
